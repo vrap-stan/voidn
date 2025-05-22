@@ -1,0 +1,50 @@
+1.
+미리 python이 있어야함. 그래서 cmd에서 바로 python실행 시 내가 원하는 파이썬이 잡히는지 확인. 안 돼서 miniconda의 python이 잡히도록 다 설정함
+HKEY_CURRENT_USER\SOFTWARE\Microsoft\Command Processor
+에서
+AutoRun의 값을 다음으로 변경함
+call "C:\ProgramData\miniconda3\condabin\conda_hook.bat" && conda activate base
+
+이후 chocolatey이용하여 ninja, clang 설치
+
+cuda 설치, 난 12.9
+
+2.
+mkdir build
+cd build
+
+3.
+TBB설치 (release로부터 다운로드) 후 설치한 경로를 아래의 -DTBB_ROOT에 추가함
+cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DOpenImageIO_ROOT="D:/work/vcpkg/packages/openimageio_x64-windows" -DTBB_ROOT="D:/work/oneapi-tbb-2022.1.0" -DOIDN_DEVICE_CUDA=ON -DOIDN_INSTALL_DEPENDENCIES=ON ..
+
+
+쿠다 연결하려면 MSVC의 cl.exe가 path에 있어야해서 하위 실행. 없으면 비주얼스튜디오2022설치
+"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+cmake -G Ninja ^
+  -DCMAKE_TOOLCHAIN_FILE=D:/work/vcpkg/scripts/buildsystems/vcpkg.cmake ^
+  -DCMAKE_C_COMPILER=clang ^
+  -DCMAKE_CXX_COMPILER=clang++ ^
+  -DTBB_ROOT="D:/work/oneapi-tbb-2022.1.0" ^
+  -DTBB_DIR="D:/work/oneapi-tbb-2022.1.0" ^
+  -S .. ^
+  -B . ^
+  -DCMAKE_C_COMPILER=clang ^
+  -DCMAKE_CXX_COMPILER=clang++ ^
+  -DOpenImageIO_ROOT="D:/work/vcpkg/packages/openimageio_x64-windows" ^
+  -DOIDN_DEVICE_CUDA=ON ^
+  -DOIDN_INSTALL_DEPENDENCIES=ON ^
+  -DOIDN_APPS_OPENIMAGEIO=ON
+
+4.
+cmake-gui ..
+이 때 exr을 사용가능하게하려면 oiio없어서 설치해야함 (https://github.com/AcademySoftwareFoundation/OpenImageIO/blob/main/INSTALL.md)
+oiio는 vcpkg로 받을 수 있음
+vcpkg 클론 후 내부의 bootstrap 실행
+cmd에서 vcpkg를 잡을 수 있도록 설치한 경로를 시스템 환경변수에 추가해줌
+oiio인스톨
+vcpkg install openimageio[tools]
+
+5. 빌드 (32코어)
+ninja -j 32
+ninja install 이 때 cmd를 관리자권한으로 실행해야함

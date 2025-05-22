@@ -1,0 +1,8 @@
+build
+thirdparty
+*.hdr
+*.exr
+*.png
+*.jpg
+*.jpeg
+*.tiff
