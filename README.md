@@ -2,9 +2,18 @@
 
 VRAPOINT C++ 테스트 프로젝트
 
----
+### - 2025
 
-## - 2025.05.22
+#### 05.26
+
+KTX 직접 빌드 (ktx.exe를 함수형태로 사용할 수 있도록 ktxdll 빌드) 후 연결
+
+#### 05.22
+
+인텔 OpenImageDenoise 연결
+구글 드라코 연결 (Autodesk FBX 연결)
+
+---
 
 #### 인텔 oidn 빌드 및 환경 구성
 
@@ -33,4 +42,15 @@ thirdparty/oidn에 oidn빌드파일들이 들어있어야 함
 
 - OIDN : OIDN 빌드과정 참조
 - MinGW 중 g++, 경로는 기본 (C:/MinGW) : 디버깅 위한 gdb
-- 빌드는 cmake, ninja, clang으로 진행
+- 디버그빌드(F5)는 cmake, ninja, clang으로 진행
+- 릴리즈는 VS로 진행되더라 (cd build && cmake .. && cmake --build . --config Release만 실행)
+- Autodesk FBX SDK를 설치해야함
+- [KTX프로그램을 따로 빌드](https://github.com/vrap-stan/ktxdll), 함수 형태로 사용가능하도록 변경.
+
+* KTX에서 필요한 다음 파일들 링크
+  > astcenc-avx2-static.lib
+  > fmt.lib // ktx는 v10, OIIO는 v11을 사용하므로 이름을 fmtv10.lib으로 변경하여 가져옴
+  > ktxdll.lib
+  > imageio.lib
+
+- KTX내부적으로 Pathcch 사용함 (윈도우에서 경로 파싱)

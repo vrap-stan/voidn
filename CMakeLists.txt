@@ -21,6 +21,13 @@ set(FBX_SDK_DIR "C:/Program Files/Autodesk/FBX/FBX SDK/2020.3.7")
 include_directories(${FBX_SDK_DIR}/include)
 # link_directories(${FBX_SDK_DIR}/lib/x64/debug)
 
+# ktx
+set(KTX_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ktx")
+include_directories(${KTX_DIR}/include)
+
+# ktx fmt, openimageio는 fmt::v11을 쓰지만 ktx는 fmt::v10을 사용함
+# add_subdirectory(thirdparty/fmt)
+# find_package(fmt CONFIG REQUIRED)
 
 #ofbx
 # find_package(libdeflate CONFIG REQUIRED)
@@ -30,7 +37,8 @@ include_directories(${FBX_SDK_DIR}/include)
 # # link_directories(${OFBX_DIR}/lib)
 
 # vcpkg 설정 (OpenImageIO)
-find_package(OpenImageIO CONFIG REQUIRED)
+find_package(OpenImageIO CONFIG REQUIRED) #위의 fmt가 필요
+# add_subdirectory(thirdparty/OpenImageIO-3.0.6.1) #위의 fmt가 필요
 find_package(draco CONFIG REQUIRED)
 
 
@@ -39,6 +47,7 @@ add_executable(oidn_app main.cpp)
 # oidn 및 OpenImageIO 링크
 target_link_libraries(oidn_app PRIVATE
     draco::draco
+    fmt::fmt
     # libdeflate
     # openfbx
     OpenImageIO::OpenImageIO
@@ -48,10 +57,10 @@ target_link_libraries(oidn_app PRIVATE
     OpenImageDenoise_device_cuda.lib
 
     # Autodesk FBX
-    ${FBX_SDK_DIR}/lib/x64/debug/alembic.lib
-    ${FBX_SDK_DIR}/lib/x64/debug/libfbxsdk.lib
-    ${FBX_SDK_DIR}/lib/x64/debug/libxml2.lib
-    ${FBX_SDK_DIR}/lib/x64/debug/zlib.lib
+    # ${FBX_SDK_DIR}/lib/x64/debug/alembic.lib
+    # ${FBX_SDK_DIR}/lib/x64/debug/libfbxsdk.lib
+    # ${FBX_SDK_DIR}/lib/x64/debug/libxml2.lib
+    # ${FBX_SDK_DIR}/lib/x64/debug/zlib.lib
 
     # ${FBX_SDK_DIR}/lib/x64/debug/alembic-md.lib
     # ${FBX_SDK_DIR}/lib/x64/debug/libfbxsdk-md.lib
@@ -62,4 +71,28 @@ target_link_libraries(oidn_app PRIVATE
     # ${FBX_SDK_DIR}/lib/x64/debug/libfbxsdk-mt.lib
     # ${FBX_SDK_DIR}/lib/x64/debug/libxml2-mt.lib
     # ${FBX_SDK_DIR}/lib/x64/debug/zlib-mt.lib
+
+    ${FBX_SDK_DIR}/lib/x64/release/alembic.lib
+    ${FBX_SDK_DIR}/lib/x64/release/libfbxsdk.lib
+    ${FBX_SDK_DIR}/lib/x64/release/libxml2.lib
+    ${FBX_SDK_DIR}/lib/x64/release/zlib.lib
+
+
+    #KTX
+    Pathcch
+    # ${KTX_DIR}/lib/Debug/ktx.lib
+    # ${KTX_DIR}/lib/Debug/ktx_read.lib
+    # ${KTX_DIR}/lib/Debug/objUtil.lib
+    # ${KTX_DIR}/lib/Debug/ktxdll.lib
+    # ${KTX_DIR}/lib/Debug/fmtdv10.lib
+    # ${KTX_DIR}/lib/Debug/astcenc-avx2-static.lib
+    # ${KTX_DIR}/lib/Debug/imageio.lib
+
+    ${KTX_DIR}/lib/Release/ktx.lib
+    ${KTX_DIR}/lib/Release/ktx_read.lib
+    ${KTX_DIR}/lib/Release/objUtil.lib
+    ${KTX_DIR}/lib/Release/ktxdll.lib
+    ${KTX_DIR}/lib/Release/fmtv10.lib
+    ${KTX_DIR}/lib/Release/astcenc-avx2-static.lib
+    ${KTX_DIR}/lib/Release/imageio.lib
 )

@@ -6,6 +6,8 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include "ktx_main.h"
+// #include <ktx.h>
 
 // Initialize FBX SDK
 void InitializeSdkObjects(FbxManager *&pManager, FbxScene *&pScene)
@@ -188,6 +190,9 @@ void ProcessNode(FbxNode *pNode, const std::string &outputPrefix, int &meshIndex
 
 int main(int argc, char **argv)
 {
+    return ktx_main(argc, argv);
+    // ktxTexture1_NeedsTranscoding(nullptr);
+
     if (argc != 3)
     {
         std::cerr << "Usage: " << argv[0] << " <input.fbx> <output_prefix>" << std::endl;

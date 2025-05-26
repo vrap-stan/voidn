@@ -1,6 +1,5 @@
 {
     "cmake.generator": "Ninja",
-    "cmake.configureOnOpen": true,
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "cmake.configureSettings": {
         "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
