@@ -7,3 +7,6 @@ thirdparty
 *.jpeg
 *.tiff
 *.fbx
+
+/**/__pycache__
+**/*.ktx2
