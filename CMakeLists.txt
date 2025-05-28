@@ -15,13 +15,29 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenImageIO CONFIG REQUIRED) #위의 fmt가 필요
 # add_subdirectory(thirdparty/OpenImageIO-3.0.6.1) #위의 fmt가 필요
 find_package(draco CONFIG REQUIRED)
+find_package(tbb CONFIG REQUIRED)
 
 
 add_library(vcpp_core SHARED
-    core.cpp
-    core.h
+    core/core.cpp
+    core/core.h
 )
 
+# if debug, "$ENV{VCPKG_ROOT}/x64-windows/debug/lib", else "$ENV{VCPKG_ROOT}/installed/x64-windows/lib"
+
+# target_link_directories(vcpp_core PRIVATE
+#     $ENV{VCPKG_ROOT}/installed/x64-windows/lib
+# )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_directories(vcpp_core PRIVATE
+        $ENV{VCPKG_ROOT}/installed/x64-windows/debug/lib
+    )
+else()
+    target_link_directories(vcpp_core PRIVATE
+        $ENV{VCPKG_ROOT}/installed/x64-windows/lib
+    )
+endif()
 
 # OIDN 설정
 set(OIDN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/oidn")
@@ -53,16 +69,29 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(KTX_LIB_DIR ${KTX_DIR}/lib/Debug)
     set(OIDN_LIB_DIR ${OIDN_DIR}/lib/Debug)
 
+    set(TBB_LIBS
+        tbb12_debug.lib
+        tbbmalloc_debug.lib
+        tbbmalloc_proxy_debug.lib
+    )
+
 else()
     set(FBX_LIB_DIR ${FBX_SDK_DIR}/lib/x64/release)
     set(KTX_LIB_DIR ${KTX_DIR}/lib/Release)
     set(OIDN_LIB_DIR ${OIDN_DIR}/lib/Release)
+
+    set(TBB_LIBS
+        tbb12.lib
+        tbbmalloc.lib
+        tbbmalloc_proxy.lib
+    )
 endif()
 
 # oidn 및 OpenImageIO 링크
 target_link_libraries(vcpp_core PRIVATE
     draco::draco
     fmt::fmt
+    ${TBB_LIBS}
     # libdeflate
     # openfbx
     OpenImageIO::OpenImageIO

@@ -12,5 +12,5 @@ extern "C"
 
     VCPP_API int vcpp_fbx(int argc, char *argv[]);
 
-    VCPP_API int vcpp_image(char **file_name);
+    VCPP_API int vcpp_image(int argc, char *argv[]);
 }

@@ -1,1 +1,1 @@
-cmake -B build -S . -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -B build -S . -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake

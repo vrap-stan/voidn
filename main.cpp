@@ -1,4 +1,4 @@
-#include "core.h"
+#include "core/core.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -87,7 +87,7 @@ int main()
             vcpp_fbx(answer.argc, argv_holder.get());
             break;
         case 3:
-            vcpp_image(argv_holder.get());
+            vcpp_image(answer.argc, argv_holder.get());
             break;
         default:
             std::cerr << "Invalid choice.\n";
