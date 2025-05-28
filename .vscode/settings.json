@@ -1,9 +1,14 @@
 {
-    "cmake.generator": "Ninja",
+    // "cmake.generator": "Ninja",
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "cmake.configureSettings": {
         "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
     },
+    "cmake.configureOnOpen": false,
+    "cmake.configureOnEdit": false,
+    "cmake.configureOnSave": false,
+    "cmake.autoRestartBuild": false,
+    "cmake.buildOnSave": false,
     "C_Cpp.default.compilerPath": "C:/Program Files/LLVM/bin/clang++.exe",
     "files.associations": {
         "vector": "cpp",
@@ -85,7 +90,24 @@
         "xmemory": "cpp",
         "xtr1common": "cpp",
         "xtree": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "any": "cpp",
+        "bitset": "cpp",
+        "cinttypes": "cpp",
+        "codecvt": "cpp",
+        "complex": "cpp",
+        "csetjmp": "cpp",
+        "filesystem": "cpp",
+        "regex": "cpp",
+        "set": "cpp",
+        "source_location": "cpp",
+        "stack": "cpp",
+        "typeindex": "cpp",
+        "unordered_set": "cpp",
+        "variant": "cpp",
+        "xstddef": "cpp",
+        "expected": "cpp",
+        "stacktrace": "cpp"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"

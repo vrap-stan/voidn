@@ -8,11 +8,13 @@
             "args": [
                 "-B",
                 "build",
+                "-G",
+                "Ninja",
                 "-S",
                 ".",
                 "-DCMAKE_BUILD_TYPE=Debug",
-                "-G",
-                "Ninja",
+                // "-G",
+                // "Ninja",
                 "-DCMAKE_TOOLCHAIN_FILE=${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             ],
             "problemMatcher": [],
@@ -25,9 +27,11 @@
             "args": [
                 "--build",
                 "build",
-                "--",
-                "-j",
-                "${env:NUMBER_OF_PROCESSORS}"
+                "--config",
+                "Debug"
+                // "--",
+                // "-j",
+                // "${env:NUMBER_OF_PROCESSORS}"
             ],
             "problemMatcher": [],
             "group": "build",

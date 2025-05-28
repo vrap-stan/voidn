@@ -52,5 +52,4 @@ thirdparty/oidn에 oidn빌드파일들이 들어있어야 함
   > fmt.lib // ktx는 v10, OIIO는 v11을 사용하므로 이름을 fmtv10.lib으로 변경하여 가져옴
   > ktxdll.lib
   > imageio.lib
-
-- KTX내부적으로 Pathcch 사용함 (윈도우에서 경로 파싱)
+  > Pathcch (설치x, 윈도 내부적으로 가지고 있음)
