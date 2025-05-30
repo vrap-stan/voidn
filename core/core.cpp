@@ -15,6 +15,7 @@
 #include "ktx_main.h"
 #include <OpenImageIO/imageio.h>
 #include <OpenImageDenoise/oidn.hpp>
+#include <nlohmann/json.hpp>
 
 #include "core/core.h"
 
@@ -288,6 +289,7 @@ extern "C"
         // std::vector<float> output(color.size());
 
         // OIDN 디바이스 생성 및 커밋
+
         oidn::DeviceRef device = oidn::newDevice(oidn::DeviceType::CUDA);
         device.commit();
 
@@ -343,4 +345,67 @@ extern "C"
 
         return 0;
     }
+
+    // options is stringified JSON
+    VCPP_API int vcpp_test(int argc, char *argv[], const char *options)
+    {
+        std::cout << "Test function called with " << argc << " arguments." << std::endl;
+        for (int i = 0; i < argc; ++i)
+        {
+            std::cout << "Argument " << i << ": " << argv[i] << std::endl;
+        }
+
+        if (options)
+        {
+            std::cout << "JSON 인자: " << options << std::endl;
+            try
+            {
+                auto j = nlohmann::json::parse(options);
+
+                int i = 1;
+                for (auto &element : j)
+                {
+                    std::cout << i++ << " : " << element << '\n';
+                }
+
+                std::vector<std::string> checkKeys = {"null value", "Combined array", "Will not be found"};
+
+                for (const auto &key : checkKeys)
+                {
+                    if (j.contains(key))
+                    {
+                        std::cout << key << ": " << j[key] << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << key << " not found in JSON." << std::endl;
+                    }
+                }
+
+                std::cout << j["Combined array"][3] << std::endl;
+                const auto isNull = j["Combined array"][3].is_null();
+
+                if (isNull)
+                {
+                    std::cout << "Combined array[3] is null." << std::endl;
+                }
+                else
+                {
+                    std::cout << "Combined array[3] is not null." << std::endl;
+                }
+                std::cout << "JSON 파싱 성공!" << std::endl;
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "JSON 파싱 오류: " << e.what() << "\n";
+            }
+        }
+
+        return 0;
+    }
+}
+
+void print_json(const nlohmann::json_abi_v3_12_0::json &j)
+{
+    std::cout << j.dump(4) << std::endl;
 }

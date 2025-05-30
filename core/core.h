@@ -13,4 +13,6 @@ extern "C"
     VCPP_API int vcpp_fbx(int argc, char *argv[]);
 
     VCPP_API int vcpp_image(int argc, char *argv[]);
+
+    VCPP_API int vcpp_test(int argc, char *argv[], const char *options);
 }
