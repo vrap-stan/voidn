@@ -1,6 +1,7 @@
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 
 // stl
+// #include <windows.h>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -205,12 +206,12 @@ void ProcessNode(FbxNode *pNode, const std::string &outputPrefix, int &meshIndex
 extern "C"
 {
 
-    VCPP_API int vcpp_ktx(int argc, char **argv)
+    VCPP_API int vcpp_ktx(int argc, char **argv, const char *options)
     {
         return ktx_main(argc, argv);
     }
 
-    VCPP_API int vcpp_fbx(int argc, char *argv[])
+    VCPP_API int vcpp_fbx(int argc, char *argv[], const char *options)
     {
         if (argc != 3)
         {
@@ -244,16 +245,33 @@ extern "C"
         return 0;
     }
 
-    VCPP_API int vcpp_image(int argc, char **file_name)
+    VCPP_API int vcpp_image_denoise(const char *options)
     {
-        if (argc != 2)
+        if (!options)
         {
-            std::cerr << "Usage: " << file_name[0] << " <input_image>" << std::endl;
+            std::cerr << "No options provided." << std::endl;
             return 1;
         }
 
-        const std::string input_filename = file_name[0];
-        const std::string output_filename = file_name[1];
+        auto j = nlohmann::json::parse(options);
+
+        struct ImageDenoiseOptions
+        {
+            std::string input;
+            std::string output;
+        };
+
+        std::cout << "JSON 인자: " << j.dump(4) << std::endl;
+
+        auto option = ImageDenoiseOptions();
+        j.at("input").get_to(option.input);
+        j.at("output").get_to(option.output);
+
+        std::cout << "Input : " << option.input << std::endl;
+        std::cout << "Output: " << option.output << std::endl;
+
+        const std::string input_filename = option.input;
+        const std::string output_filename = option.output;
 
         // 입력 이미지 열기
         auto input = OIIO::ImageInput::open(input_filename);
@@ -290,7 +308,32 @@ extern "C"
 
         // OIDN 디바이스 생성 및 커밋
 
-        oidn::DeviceRef device = oidn::newDevice(oidn::DeviceType::CUDA);
+        std::shared_ptr<oidn::DeviceRef> devicePtr;
+
+        // try
+        // {
+        //     std::cout << " CUDA 디바이스를 사용합니다." << std::endl;
+        //     devicePtr = std::make_shared<oidn::DeviceRef>(oidn::newDevice(
+        //         oidn::DeviceType::CUDA));
+        //     std::cout << " CUDA 디바이스 설정 완료." << std::endl;
+        // }
+        // catch (const std::exception &e)
+        // {
+        //     std::cout << "CUDA 사용 불가, CPU 디바이스로 대체합니다." << std::endl;
+
+        try
+        {
+            std::cout << " CPU 디바이스를 사용합니다." << std::endl;
+            devicePtr = std::make_shared<oidn::DeviceRef>(oidn::newDevice(
+                oidn::DeviceType::CPU));
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "CPU 디바이스 생성 실패: " << e.what() << std::endl;
+            return 1;
+        }
+        // }
+        auto &device = *devicePtr;
         device.commit();
 
         // 필터 생성 및 설정
@@ -347,58 +390,62 @@ extern "C"
     }
 
     // options is stringified JSON
-    VCPP_API int vcpp_test(int argc, char *argv[], const char *options)
+    VCPP_API int vcpp_test(const char *options)
     {
-        std::cout << "Test function called with " << argc << " arguments." << std::endl;
-        for (int i = 0; i < argc; ++i)
+        std::cout << "options address: " << static_cast<const void *>(options) << std::endl;
+        std::cout << "first byte: " << std::hex << (int)(unsigned char)(options[0]) << std::endl;
+
+        if (!options)
         {
-            std::cout << "Argument " << i << ": " << argv[i] << std::endl;
+            std::cerr << "No options provided." << std::endl;
+            return 1;
         }
 
-        if (options)
+        std::cout << u8"JSON 인자 : " << options << std::endl;
+        try
         {
-            std::cout << "JSON 인자: " << options << std::endl;
-            try
+            auto j = nlohmann::json::parse(options);
             {
-                auto j = nlohmann::json::parse(options);
+                const auto stringValue = j["string value"].get<std::string>();
+                std::cout << "string value: " << stringValue << std::endl;
+            }
 
-                int i = 1;
-                for (auto &element : j)
+            int i = 1;
+            for (auto &element : j)
+            {
+                std::cout << i++ << " : " << element << '\n';
+            }
+
+            std::vector<std::string> checkKeys = {"null value", "Combined array", "Will not be found"};
+
+            for (const auto &key : checkKeys)
+            {
+                if (j.contains(key))
                 {
-                    std::cout << i++ << " : " << element << '\n';
-                }
-
-                std::vector<std::string> checkKeys = {"null value", "Combined array", "Will not be found"};
-
-                for (const auto &key : checkKeys)
-                {
-                    if (j.contains(key))
-                    {
-                        std::cout << key << ": " << j[key] << std::endl;
-                    }
-                    else
-                    {
-                        std::cout << key << " not found in JSON." << std::endl;
-                    }
-                }
-
-                std::cout << j["Combined array"][3] << std::endl;
-                const auto isNull = j["Combined array"][3].is_null();
-
-                if (isNull)
-                {
-                    std::cout << "Combined array[3] is null." << std::endl;
+                    std::cout << key << ": " << j[key] << std::endl;
                 }
                 else
                 {
-                    std::cout << "Combined array[3] is not null." << std::endl;
+                    std::cout << key << " not found in JSON." << std::endl;
                 }
-                std::cout << "JSON 파싱 성공!" << std::endl;
             }
-            catch (const std::exception &e)
+
+            std::cout << j["Combined array"][3] << std::endl;
+            const auto isNull = j["Combined array"][3].is_null();
+
+            if (isNull)
             {
-                std::cerr << "JSON 파싱 오류: " << e.what() << "\n";
+                std::cout << "Combined array[3] is null." << std::endl;
             }
+            else
+            {
+                std::cout << "Combined array[3] is not null." << std::endl;
+            }
+            std::cout << "JSON 파싱 성공!" << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "JSON 파싱 오류: " << e.what() << "\n";
         }
 
         return 0;

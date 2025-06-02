@@ -6,14 +6,34 @@ import shlex
 # DLL 파일의 기본 경로. 이 스크립트 파일과 같은 디렉토리에 있는 "ktxdll.dll"을 가리킵니다.
 
 
+def dict_to_json_string(options: dict) -> str:
+    options_str = json.dumps(options)
+    options_buf = ctypes.create_string_buffer(options_str.encode("utf-8"))
+    options_char = ctypes.cast(options_buf, ctypes.c_char_p)
+    return options_char
+
+
 def find_dll():
-    right_next = os.path.join(os.path.dirname(__file__), "ktxdll.dll")
+    right_next = os.path.join(os.path.dirname(__file__), "vcpp_core.dll")
     if os.path.exists(right_next):
         return right_next
 
-    build_test = os.path.join(os.path.dirname(__file__), "../build/vcpp_core.dll")
-    if os.path.exists(build_test):
-        return build_test
+    # Release 빌드
+    if True:
+        build_test = os.path.join(
+            os.path.dirname(__file__), "../build-Release/vcpp_core.dll"
+        )
+        if os.path.exists(build_test):
+            print("Using Release build DLL:", build_test)
+            return build_test
+
+    if True:
+        build_test = os.path.join(
+            os.path.dirname(__file__), "../build-Debug/vcpp_core.dll"
+        )
+        if os.path.exists(build_test):
+            print("Using Debug build DLL:", build_test)
+            return build_test
 
     # warn
     print(
@@ -26,7 +46,7 @@ DLL_PATH = find_dll()
 CORE_DLL = None  # ctypes로 로드된 DLL 객체를 저장할 변수
 CORE_KTX_FUNC = None  # DLL 내의 vcpp_ktx 함수 포인터를 저장할 변수
 CORE_FBX_FUNC = None  # DLL 내의 vcpp_fbx 함수 포인터를 저장할 변수
-CORE_OIDN_FUNC = None  # DLL 내의 vcpp_image 함수 포인터를 저장할 변수
+CORE_IMAGE_DENOISE_FUNC = None  # DLL 내의 vcpp_image 함수 포인터를 저장할 변수
 CORE_TEST_FUNC = None  # DLL 내의 vcpp_test 함수 포인터를 저장할 변수
 
 
@@ -83,7 +103,7 @@ def init_dll():
     설정된 DLL_PATH를 사용하여 KTX DLL을 로드하고 vpp_ktx 함수를 준비합니다.
     이 함수는 스크립트 시작 시 또는 set_dll_path 호출 시 실행됩니다.
     """
-    global DLL_PATH, CORE_DLL, CORE_KTX_FUNC, CORE_FBX_FUNC, CORE_OIDN_FUNC, CORE_TEST_FUNC
+    global DLL_PATH, CORE_DLL, CORE_KTX_FUNC, CORE_FBX_FUNC, CORE_IMAGE_DENOISE_FUNC, CORE_TEST_FUNC
 
     if DLL_PATH is None or DLL_PATH == "" or not os.path.exists(DLL_PATH):
         print(f"DLL 경로를 설정해주세요. 현재 설정된 경로: {DLL_PATH}")
@@ -131,15 +151,15 @@ def init_dll():
         exit(1)
 
     try:
-        CORE_OIDN_FUNC = CORE_DLL.vcpp_image
-        CORE_OIDN_FUNC.argtypes = [
-            ctypes.c_int,
-            ctypes.POINTER(ctypes.c_char_p),
+        CORE_IMAGE_DENOISE_FUNC = CORE_DLL.vcpp_image_denoise
+        CORE_IMAGE_DENOISE_FUNC.argtypes = [
             ctypes.c_char_p,
         ]
-        CORE_OIDN_FUNC.restype = ctypes.c_int
+        CORE_IMAGE_DENOISE_FUNC.restype = ctypes.c_int
     except AttributeError:
-        print(f"오류: DLL '{DLL_PATH}'에서 'oidn' 함수를 찾을 수 없습니다.")
+        print(
+            f"오류: DLL '{DLL_PATH}'에서 'vcpp_image_denoise' 함수를 찾을 수 없습니다."
+        )
         print(
             '함수가 올바르게 익스포트되었는지 확인하세요 (예: __declspec(dllexport) 및 extern "C" 사용).'
         )
@@ -148,8 +168,6 @@ def init_dll():
     try:
         CORE_TEST_FUNC = CORE_DLL.vcpp_test
         CORE_TEST_FUNC.argtypes = [
-            ctypes.c_int,
-            ctypes.POINTER(ctypes.c_char_p),
             ctypes.c_char_p,
         ]
         CORE_TEST_FUNC.restype = ctypes.c_int
@@ -209,10 +227,35 @@ def pyktx_list(cmd_list: list[str], options: dict = {}):
 
     # print(f"argc={argc}, argv={[arg for arg in cmd_list]}로 vpp_ktx 호출 중")
 
+    options_str = dict_to_json_string(options)
+
     # 함수를 호출합니다.
-    return_code = CORE_KTX_FUNC(argc, argv_c)
+    return_code = CORE_KTX_FUNC(argc, argv_c, options_str)
 
     # print(f"vpp_ktx 반환 값: {return_code}")
+    return return_code
+
+
+def image_denoise(input: str, output: str):
+    if CORE_TEST_FUNC is None:
+        print(
+            "오류: KTX DLL 또는 vpp_test 함수가 초기화되지 않았습니다. init_dll()을 먼저 호출하세요."
+        )
+        return -1
+
+    if not os.path.exists(input):
+        print(f"오류: 입력 파일 '{input}'이(가) 존재하지 않습니다.")
+        return -1
+
+    options_str = json.dumps(
+        {
+            "input": input,
+            "output": output,
+        }
+    ).encode("utf-8")
+
+    return_code = CORE_IMAGE_DENOISE_FUNC(options_str)
+    # return_code = CORE_TEST_FUNC(argc, argv_c, None)
     return return_code
 
 
@@ -223,16 +266,8 @@ def test(options: dict):
         )
         return -1
 
-    cmd_list = ["test arg1", "test arg2"]
+    options_char = dict_to_json_string(options)
 
-    argc = len(cmd_list)
-    argv_bytes = [arg.encode("utf-8") for arg in cmd_list]
-
-    argv_c = (ctypes.c_char_p * argc)()
-    for i, arg_byte_str in enumerate(argv_bytes):
-        argv_c[i] = arg_byte_str
-
-    options_str = json.dumps(options).encode("utf-8")
-
-    return_code = CORE_TEST_FUNC(argc, argv_c, options_str)
+    return_code = CORE_TEST_FUNC(options_char)
+    # return_code = CORE_TEST_FUNC(argc, argv_c, None)
     return return_code

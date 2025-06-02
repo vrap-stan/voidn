@@ -1,5 +1,5 @@
 import os
-from runner_core import pyktx, test
+from runner_core import image_denoise, pyktx, test
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -9,14 +9,21 @@ if __name__ == "__main__":
     # output1 = os.path.join(cur_dir, "output1.ktx2")
     # pyktx(f'oidn_app.exe create --format R8G8B8A8_UNORM --zstd 10 --assign-oetf linear --assign-primaries bt709 {input1} {output1}')
 
-    # input2 = os.path.join(cur_dir, "한글 띄어쓰기.tga")
-    # output2 = os.path.join(cur_dir, "output2.ktx2")
-    # pyktx(f'oidn_app.exe create --format R8G8B8A8_UNORM --zstd 10 --assign-oetf linear --assign-primaries bt709 "{input2}" {output2}')
+    input2 = os.path.join(cur_dir, "한글 띄어쓰기.tga")
+    output2 = os.path.join(cur_dir, "한글 띄어쓰기 output.ktx2")
+    try:
+        pyktx(
+            f'oidn_app.exe create --format R8G8B8A8_UNORM --zstd 10 --assign-oetf linear --assign-primaries bt709 "{input2}" "{output2}"'
+        )
+    except Exception as e:
+        print(f"Error processing {input2}: {e}")
+
     test(
         {
             "Option from python": [
                 "arr1",
                 "arr2",
+                "한글",
             ],
             "boolean value": True,
             "integer value": 42,
@@ -36,3 +43,7 @@ if __name__ == "__main__":
             ],
         }
     )
+
+    image_denoise("d:/work/voidn/input.hdr", "d:/work/voidn/hhrrdd.hdr")
+
+    print("Finished")

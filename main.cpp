@@ -87,7 +87,7 @@ int main()
             vcpp_fbx(answer.argc, argv_holder.get());
             break;
         case 3:
-            vcpp_image(answer.argc, argv_holder.get());
+            vcpp_image_denoise("{ \"input\" : \"d:/work/voidn/input.hdr\", \"output\" : \"d:/work/voidn/ggg.hdr\" }");
             break;
         default:
             std::cerr << "Invalid choice.\n";
@@ -102,3 +102,36 @@ int main()
 
     return 0;
 }
+
+// #include <OpenImageDenoise/oidn.hpp>
+// #include <iostream>
+
+// int main()
+// {
+//     std::cout << "Start OIDN test\n";
+//     try
+//     {
+//         std::cout << "Creating OIDN device...\n";
+//         auto device = oidn::newDevice(oidn::DeviceType::CUDA);
+//         std::cout << "New device\n";
+//         device.commit();
+
+//         std::cout << "OIDN device created successfully.\n";
+
+//         const char *errMsg;
+//         if (device.getError(errMsg) != oidn::Error::None)
+//         {
+//             std::cerr << "OIDN error: " << errMsg << "\n";
+//         }
+//         else
+//         {
+//             std::cout << "Device created and committed successfully.\n";
+//         }
+//     }
+//     catch (const std::exception &e)
+//     {
+//         std::cerr << "Caught exception: " << e.what() << "\n";
+//     }
+
+//     return 0;
+// }

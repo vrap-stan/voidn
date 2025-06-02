@@ -107,7 +107,10 @@
         "variant": "cpp",
         "xstddef": "cpp",
         "expected": "cpp",
-        "stacktrace": "cpp"
+        "stacktrace": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "valarray": "cpp"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"

@@ -1,1 +1,1 @@
-cmake --build build --config Debug
+cmake --build build-Debug --config Debug
