@@ -110,7 +110,12 @@
         "stacktrace": "cpp",
         "ranges": "cpp",
         "span": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "cfenv": "cpp",
+        "csignal": "cpp",
+        "execution": "cpp",
+        "shared_mutex": "cpp",
+        "strstream": "cpp"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"

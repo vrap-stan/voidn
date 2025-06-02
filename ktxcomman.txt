@@ -1,0 +1,1 @@
+oidn_app.exe create --format R8G8B8A8_UNORM --zstd 10 --assign-oetf linear --assign-primaries bt709 "D:\work\voidn\한글 띄어쓰기.tga" "D:\work\voidn\한글 아웃풋.ktx2"

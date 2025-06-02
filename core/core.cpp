@@ -308,24 +308,28 @@ extern "C"
 
         // OIDN 디바이스 생성 및 커밋
 
-        std::shared_ptr<oidn::DeviceRef> devicePtr;
-
-        // try
-        // {
-        //     std::cout << " CUDA 디바이스를 사용합니다." << std::endl;
-        //     devicePtr = std::make_shared<oidn::DeviceRef>(oidn::newDevice(
-        //         oidn::DeviceType::CUDA));
-        //     std::cout << " CUDA 디바이스 설정 완료." << std::endl;
-        // }
-        // catch (const std::exception &e)
-        // {
-        //     std::cout << "CUDA 사용 불가, CPU 디바이스로 대체합니다." << std::endl;
+        std::shared_ptr<oidn::DeviceRef> devicePtr = nullptr;
 
         try
         {
-            std::cout << " CPU 디바이스를 사용합니다." << std::endl;
+            std::cout << " CUDA 디바이스를 사용합니다." << std::endl;
             devicePtr = std::make_shared<oidn::DeviceRef>(oidn::newDevice(
-                oidn::DeviceType::CPU));
+                oidn::DeviceType::CUDA));
+            std::cout << " CUDA 디바이스 설정 완료." << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+            std::cout << "CUDA 사용 불가, CPU 디바이스로 대체합니다." << std::endl;
+        }
+
+        try
+        {
+            if (nullptr == devicePtr)
+            {
+                std::cout << " CPU 디바이스를 사용합니다." << std::endl;
+                devicePtr = std::make_shared<oidn::DeviceRef>(oidn::newDevice(
+                    oidn::DeviceType::CPU));
+            }
         }
         catch (const std::exception &e)
         {
